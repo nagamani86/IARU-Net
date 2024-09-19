@@ -1,0 +1,39 @@
+import numpy as np
+from sklearn.metrics import precision_score, recall_score, f1_score
+
+def metrics(prediction, images):
+    y_true = np.array(images)
+    y_pred = np.array(prediction)
+    
+    y_true = (y_true > 0).astype(int)
+    y_pred = (y_pred > 0).astype(int)
+    
+    # Calculate IoU
+    intersection = np.sum(y_true * y_pred, axis=(1, 2, 3))
+    union = np.sum(y_true, axis=(1, 2, 3)) + np.sum(y_pred, axis=(1, 2, 3)) - intersection
+    iou_score = (intersection + 1e-15) / (union + 1e-15)
+
+    # Flatten the arrays to compute precision, recall, and F1 score
+    y_true_flat = y_true.reshape(-1)
+    y_pred_flat = y_pred.reshape(-1)
+    
+    precision = precision_score(y_true_flat, y_pred_flat, zero_division=0)
+    recall = recall_score(y_true_flat, y_pred_flat, zero_division=0)
+    f1 = f1_score(y_true_flat, y_pred_flat, zero_division=0)
+    
+    return iou_score, precision, recall, f1
+
+model1 = tf.keras.models.load_model('/kaggle/working/accuracy_metrics/proposed_model.h5',custom_objects={'DiceCoefficientLoss': DiceCoefficientLoss})
+All_Model = [model1]
+Model_name =['ourmodel']
+
+for i in range(len(All_Model)):
+    print("------"+Model_names[i]+"------")
+    print("Train")
+    print(All_Model[i].evaluate(images_train,masks_train))
+    iou,precision,recall,f1_score = metrics(All_Model[i].predict(images_train),masks_train)
+    print("Precision",np.array(sum(precision)/len(precision)*100))
+    print("Recall",np.array(sum(recall)/len(recall)*100))
+    print("F1_score",np.array(sum(f1_score)/len(f1_score)*100))
+    print("Iou_score",np.array(sum(iou)/len(iou)*100))
+  
