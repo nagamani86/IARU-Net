@@ -1,0 +1,151 @@
+####################splitting the images to 4 parts"""""""""""""""""""'
+
+from PIL import Image
+import os
+
+def cut_and_save(image_path, output_folder):
+    # Load the original image
+    original_image = Image.open(image_path)
+    name = image_path.split('/')[-1][:-4]
+
+    # Ensure the image can be evenly divided into 2x2 parts
+    width, height = original_image.size
+    if width % 2 != 0 or height % 2 != 0:
+        raise ValueError("Image dimensions must be even for 2x2 cutting.")
+
+    # Calculate the dimensions of each part
+    part_width = width // 2
+    part_height = height // 2
+
+    # Create the output folder if it doesn't exist
+    os.makedirs(output_folder, exist_ok=True)
+
+    # Iterate through each part and save
+    for row in range(2):
+        for col in range(2):
+            left = col * part_width
+            upper = row * part_height
+            right = left + part_width
+            lower = upper + part_height
+
+            # Crop the image
+            cropped_image = original_image.crop((left, upper, right, lower))
+
+            # Save the cropped image
+            image_filename = f"{name}_{row}_{col}.png"  # Change the file format if needed
+            image_path = os.path.join(output_folder, image_filename)
+            cropped_image.save(image_path)
+
+# Example usage:
+for images in os.listdir('/kaggle/input/massachusetts-buildings-dataset/png/test'):
+    image_path = "/kaggle/input/massachusetts-buildings-dataset/png/test/"+images
+    mask_path = "/kaggle/input/massachusetts-buildings-dataset/png/test_labels/"+images
+    output_image = "/kaggle/working/Dataset/Test"
+    output_mask = "/kaggle/working/Dataset/Test_labels"
+    cut_and_save(image_path, output_image)
+    cut_and_save(mask_path,output_mask)
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""""""""""""""Loading the dataset"""""""""""""""""
+
+base_dir = '/kaggle/input/massachusetts-buildings-dataset/png'
+images_dir ='/kaggle/working/Dataset/Train'
+masks_dir = '/kaggle/working/Dataset/Train_labels'
+val_images_dir ='/kaggle/input/massachusetts-buildings-dataset/png/val'
+val_masks_dir = '/kaggle/input/massachusetts-buildings-dataset/png/val_labels'
+test_images_dir='/kaggle/input/massachusetts-buildings-dataset/png/test'
+test_masks_dir='/kaggle/input/massachusetts-buildings-dataset/png/test_labels'
+images_listdir = os.listdir(images_dir)
+masks_listdir = os.listdir(masks_dir)
+random_images = np.random.choice(masks_listdir, size = 9, replace = False)
+test_images_listdir = os.listdir(test_images_dir)
+test_masks_listdir = os.listdir(test_masks_dir)
+image_size=224
+input_image_size=(1500,1500)
+def read_image(path):
+    img = cv2.imread(path)
+    img = cv2.resize(img, (image_size, image_size))
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    return img
+number=548
+rows = 3
+cols = 3
+fig, ax = plt.subplots(rows, cols, figsize = (10,10))
+for i, ax in enumerate(ax.flat):
+    if i < len(random_images):
+        img = read_image(f"{images_dir}/{random_images[i]}")
+        ax.set_title(f"{random_images[i]}")
+        ax.imshow(img)
+        ax.axis('off')
+fig, ax = plt.subplots(rows, cols, figsize = (10,10))
+for i, ax in enumerate(ax.flat):
+    if i < len(random_images):
+        file=random_images[i]
+        if os.path.exists(os.path.join(masks_dir,file)):
+            img = read_image(f"{masks_dir}/{file}")
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            ax.set_title(f"{random_images[i]}")
+            ax.imshow(img)
+            ax.axis('off')
+        else:
+            print('not exist')
+
+MASKS=np.zeros((1,image_size, image_size, 1), dtype=bool)
+IMAGES=np.zeros((1,image_size, image_size, 3),dtype=np.uint8)
+
+for j,file in enumerate(masks_listdir[0:number]):   ##the smaller, the faster
+    try:
+        image = read_image(f"{images_dir}/{file}")
+        image_ex = np.expand_dims(image, axis=0)
+        IMAGES = np.vstack([IMAGES, image_ex])
+        file2=file[0:-4]+'.png'
+        mask = read_image(f"{masks_dir}/{file2}") 
+        mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+        mask = mask.reshape(224,224,1)
+        mask_ex = np.expand_dims(mask, axis=0)    
+        MASKS = np.vstack([MASKS, mask_ex])
+    except:
+        print(file)
+        continue
+TMASKS=np.zeros((1,image_size, image_size,1), dtype=bool)
+TIMAGES=np.zeros((1,image_size, image_size,3),dtype=np.uint8)
+
+for j,file in enumerate(test_images_listdir): ##the smaller, the faster
+    try:
+        image = read_image(f"{test_images_dir}/{file}")
+        image_ex = np.expand_dims(image, axis=0)
+        TIMAGES = np.vstack([TIMAGES, image_ex])
+        file2=file[0:-4]+'.png'
+        mask = read_image(f"{test_masks_dir}/{file2}") 
+        mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+        mask = mask.reshape(224,224,1)
+        mask_ex = np.expand_dims(mask, axis=0)    
+        TMASKS = np.vstack([TMASKS, mask_ex])        
+    except:
+        print(file)
+        continue
+images=np.array(IMAGES)[1:number+1]
+masks=np.array(MASKS)[1:number+1]
+print(images.shape,masks.shape)
+test_images=np.array(TIMAGES)[1:]
+test_masks=np.array(TMASKS[1:])
+print(test_images.shape,test_masks.shape)
+images_train, images_test, masks_train, masks_test = train_test_split(images, masks, test_size=0.2, random_state=42)
+print(images_train.shape)
+print(images_test.shape)
+
+images_train = images_train/255.0
+images_test = images_test/255.0
+masks_train =  masks_train/255.0
+masks_test = masks_test/255.0
