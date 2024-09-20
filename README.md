@@ -1,2 +1,5 @@
 # Nagamani-Gonthina
 Traditional U-Net models struggle with capturing fine contextual details and long-range dependencies in such images, resulting in poor boundary detection and loss of detailed information. To address these limitations, we propose the Inception Attention Residual U-Net (IARU-Net), an enhanced U-Net architecture that integrates inception modules, attention gates, residual connections, and a multi-scale fusion block. The inception modules help retain spatial information, while the attention gates efficiently extract global contextual features, addressing blurred boundary issues. Residual connections facilitate faster convergence and stable training. Experiments on the Massachusetts Building and WHU Building datasets demonstrate that IARU-Net outperforms existing state-of-the-art models in terms of precision, recall, accuracy, F1-score, and IoU, highlighting its effectiveness for semantic segmentation of high-resolution remote sensing images.
+Datasets are publicly available at :
+https://www.kaggle.com/datasets/balraj98/massachusetts-buildings-dataset
+http://gpcv.whu.edu.cn/data/building_dataset.html
