@@ -66,7 +66,7 @@ class Proposed_architecture:
 
         return a_out,conv2
     def add_conv(self,f,layer1,layer2):
-        add = Add()([layer1,layer2])
+        add = ([layer1,layer2])
         conv = Conv2D(f,(3,3),padding='same',activation = 'relu')(add)
         return conv
 
@@ -96,7 +96,7 @@ class Proposed_architecture:
         a4_o = Conv2D(self.f_1,(1,1),padding = 'same')(a4)# (224, 224, 32)
 
         final = Add()([a1_o,a2_o,a3_o,a4_o,add])  
-        output = Conv2D(1,(1,1),activation = 'sigmoid')(final)
+        
         model = Model(self.inputs,output)
         
         #learning_rate = 0.001
