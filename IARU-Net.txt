@@ -51,7 +51,6 @@ class Proposed_architecture:
         conv = BatchNormalization(axis = 3)(conv)
         low_layer = self.inception_block_dim_reduce(conv, [1024]*6, activation='relu')
         
-        return o1,o2,o3,o4,low_layer
         
         
     def attention(self,input1,input2):
@@ -95,7 +94,7 @@ class Proposed_architecture:
         a3_o = self.upsamp(1,a3)                 #( 224, 224, 32)
         a4_o = Conv2D(self.f_1,(1,1),padding = 'same')(a4)# (224, 224, 32)
 
-        final = Add()([a1_o,a2_o,a3_o,a4_o,add])  
+        
         
         model = Model(self.inputs,output)
         
